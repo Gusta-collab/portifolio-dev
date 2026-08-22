@@ -44,10 +44,10 @@ class WaveColorTitle {
     trigger.addEventListener('mouseleave', () => this.animateTo(0));
   }
 
-  createSpan(char, isAccent) {
+createSpan(char, isAccent) {
     const span = document.createElement('span');
     span.textContent = char;
-    span.style.display = 'inline-block';
+    span.style.display = 'inline'; 
     span.style.whiteSpace = char === ' ' ? 'pre' : 'normal';
     span.style.transition = 'color 0.15s ease, font-weight 0.15s ease';
     return span;
