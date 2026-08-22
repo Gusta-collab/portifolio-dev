@@ -114,6 +114,80 @@ class WaveColorTitle {
   }
 }
 
+/* ---- Custom Cursor Animation ---- */
+class CustomCursor {
+  constructor() {
+    this.cursor = document.getElementById('custom-cursor');
+    this.arrow = document.getElementById('cursor-arrow');
+    this.label = document.getElementById('cursor-label');
+    this.hero = document.getElementById('hero'); // Referência à primeira section
+    
+    // Cancela se estiver no celular (touch) ou se os elementos não existirem
+    if (!this.cursor || window.matchMedia("(pointer: coarse)").matches) return;
+    
+    this.cursor.style.display = 'block';
+    
+    // Posições (inicia fora da tela para não piscar no (0,0))
+    this.mouse = { x: -100, y: -100 };
+    this.arrowPos = { x: -100, y: -100 };
+    this.labelPos = { x: -100, y: -100 };
+    
+    // Distância da etiqueta em relação à seta
+    this.labelOffset = { x: 25, y: 12 };
+    this.isPressed = false;
+    
+    this.initEvents();
+    this.animate();
+  }
+  
+  initEvents() {
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.x = e.clientX;
+      this.mouse.y = e.clientY;
+    });
+    
+    window.addEventListener('mousedown', () => this.isPressed = true);
+    window.addEventListener('mouseup', () => this.isPressed = false);
+    
+    // Controla a visibilidade da etiqueta baseada na section hero[cite: 7]
+    if (this.hero && this.label) {
+      // Inicia oculta caso a página carregue com o mouse fora
+      this.label.style.opacity = '0';
+      this.label.style.transition = 'opacity 0.2s ease';
+
+      this.hero.addEventListener('mouseenter', () => {
+        this.label.style.opacity = '1';
+      });
+      
+      this.hero.addEventListener('mouseleave', () => {
+        this.label.style.opacity = '0';
+      });
+    }
+  }
+  
+  lerp(start, end, factor) {
+    return start + (end - start) * factor;
+  }
+  
+  animate() {
+    // Interpolação da Seta (Rápida)
+    this.arrowPos.x = this.lerp(this.arrowPos.x, this.mouse.x, 0.4);
+    this.arrowPos.y = this.lerp(this.arrowPos.y, this.mouse.y, 0.4);
+    
+    // Interpolação da Etiqueta (Lenta)
+    this.labelPos.x = this.lerp(this.labelPos.x, this.mouse.x + this.labelOffset.x, 0.15);
+    this.labelPos.y = this.lerp(this.labelPos.y, this.mouse.y + this.labelOffset.y, 0.15);
+    
+    // Aplica o clique diminuindo a escala (bounce)
+    const scale = this.isPressed ? 0.9 : 1;
+    
+    this.arrow.style.transform = `translate(${this.arrowPos.x}px, ${this.arrowPos.y}px) scale(${scale})`;
+    this.label.style.transform = `translate(${this.labelPos.x}px, ${this.labelPos.y}px) scale(${scale})`;
+    
+    requestAnimationFrame(() => this.animate());
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const header = document.getElementById('header');
   const menuToggle = document.getElementById('menu-toggle');
@@ -123,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const contactForm = document.getElementById('contact-form');
   const btnText = document.getElementById('btn-text');
   new BlackHoleAnimation('blackhole-container');
+  new CustomCursor();
   // Header scroll effect
   if (header) {
     window.addEventListener('scroll', () => {

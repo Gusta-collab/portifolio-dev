@@ -23,7 +23,6 @@
       <nav class="nav-desktop">
         <a href="#about">Sobre</a>
         <a href="#projects">Projetos</a>
-        <a href="#skills">Habilidades</a>
         <a href="#contact">Contato</a>
         <a href="#contact" class="btn-primary">Vamos conversar</a>
       </nav>
@@ -37,7 +36,6 @@
       </button>
       <a href="#about">Sobre</a>
       <a href="#projects">Projetos</a>
-      <a href="#skills">Habilidades</a>
       <a href="#contact">Contato</a>
     </div>
   </header>
@@ -45,7 +43,10 @@
   <main>
 <section class="hero" id="hero">
       <div class="container hero-grid">
-        <div class="hero-text fade-in">
+          <div class="hero-text fade-in">
+          <!-- Sua foto na bolinha -->
+          <img src="images/eu.jpg" alt="Foto de Gustavo" class="foto-bolinha" />
+          
           <p class="eyebrow">Desenvolvedor Desktop</p>
           <h1 class="hero-title hover-letter-weight">
             Transformo ideias 
@@ -74,6 +75,22 @@
           <div class="wheel"></div>
         </div>
       </div>
+
+            <!-- Custom Cursor -->
+      <div id="custom-cursor" class="custom-cursor">
+        <!-- Etiqueta (renderizada antes para ficar atrás da seta) -->
+        <div id="cursor-label" class="cursor-label">Gustavo</div>
+        
+        <!-- Seta do Cursor -->
+        <div id="cursor-arrow" class="cursor-arrow">
+          <svg width="31" height="31" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 3 L23 14 L14 16 L11 24 Z" fill="#ffffff" stroke="rgba(0,0,0,0.18)" stroke-width="0.6" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+      <script src="script.js"></script>
+    </body>
     </section>
 <section class="about" id="about">
       <div class="container">
@@ -84,7 +101,7 @@
           </div>
           <div class="about-text fade-in stagger-2">
             <p>
-              Tenho experiência no desenvolvimento de aplicativos desktop utilizando <strong>C# e Python</strong>, criando soluções corporativas sob medida. Meu foco é projetar sistemas práticos e organizados — desde a criação de interfaces gráficas funcionais até a lógica de negócios por trás de processos complexos.
+             Tenho experiência no desenvolvimento de aplicativos desktop utilizando <strong>C#</strong> e <strong>Python</strong>, criando soluções corporativas sob medida. Atualmente, atuo na <strong>Ex Soluções Tributárias</strong>, onde desenvolvo e integro ferramentas aos processos da empresa, além de prestar suporte aos usuários e identificar oportunidades de melhoria. Meu foco é criar soluções práticas e organizadas que contribuam para a <strong>otimização de processos, automação de tarefas e maior eficiência nas rotinas da equipe</strong>.
             </p>
             <p>
               Vou além da simples automação de tarefas: trabalho com a integração profunda de sistemas, manipulação de dados em tempo real e geração automatizada de relatórios técnicos (Excel e PDF). O objetivo é transformar fluxos manuais demorados em ecossistemas rápidos, seguros e padronizados.
@@ -217,56 +234,50 @@
         </div>
     </section>
 
-    <section class="contact" id="contact">
+<section class="contact" id="contact">
       <div class="container">
-        <div class="contact-grid">
-          <div class="contact-info fade-in">
-            <div>
-              <p class="eyebrow">Contato</p>
-              <h2 class="section-title">Vamos construir algo juntos?</h2>
+        
+        <div class="contact-header fade-in">
+          <p class="eyebrow">Contato</p>
+          <h2 class="section-title">Vamos construir algo juntos?</h2>
+          <p class="contact-subtitle">
+            Estou aberto a oportunidades, freelas e colaborações em projetos interessantes. Escolha a melhor forma de falar comigo:
+          </p>
+        </div>
+
+        <div class="contact-actions fade-in stagger-2">
+          
+          <!-- Botão WhatsApp -->
+          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" class="contact-action-btn">
+            <div class="action-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </div>
-            <p>
-              Estou aberto a oportunidades, freelas e colaborações em projetos interessantes. Me envie uma mensagem e vamos conversar.
-            </p>
-            <div class="contact-links">
-              <a href="mailto:gustavo@gustavoalexandre.dev" class="contact-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-                gustavo@gustavoalexandre.dev
-              </a>
-              <div class="contact-link text-muted">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                São Paulo, Brasil
-              </div>
-              <div class="contact-social">
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="contact-link">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
-                  GitHub
-                </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="contact-link">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                  LinkedIn
-                </a>
-              </div>
+            <span>WhatsApp</span>
+          </a>
+
+          <!-- Botão LinkedIn -->
+          <a href="https://linkedin.com/in/SEU_LINKEDIN" target="_blank" rel="noopener noreferrer" class="contact-action-btn">
+            <div class="action-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
             </div>
-          </div>
-          <form class="contact-form fade-in stagger-3" id="contact-form">
-            <div class="form-group">
-              <label for="name">Nome</label>
-              <input id="name" type="text" required placeholder="Seu nome" />
+            <span>LinkedIn</span>
+          </a>
+
+          <!-- Botão GitHub -->
+          <a href="https://github.com/SEU_GITHUB" target="_blank" rel="noopener noreferrer" class="contact-action-btn">
+            <div class="action-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
             </div>
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input id="email" type="email" required placeholder="seu@email.com" />
+            <span>GitHub</span>
+          </a>
+
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="contact-action-btn">
+            <div class="action-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
             </div>
-            <div class="form-group">
-              <label for="message">Mensagem</label>
-              <textarea id="message" required rows="4" placeholder="Conte-me sobre o seu projeto..."></textarea>
-            </div>
-            <button type="submit" class="btn-submit">
-              <span id="btn-text">Enviar mensagem</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-          </form>
+            <span>Instagram</span>
+          </a>
+
         </div>
       </div>
     </section>
@@ -282,9 +293,6 @@
         </a>
         <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-        </a>
-        <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
         </a>
         <a href="https://github.com" aria-label="GitHub" target="_blank" rel="noopener noreferrer">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
