@@ -3,8 +3,8 @@ class WaveColorTitle {
   constructor(element) {
     this.element = element;
     this.rafId = null;
-    this.progress = 0;   // 0 = sem cor, 1 = tudo colorido
-    this.direction = 1;  // 1 = entrando, -1 = saindo
+    this.progress = 0;   // 0 = sem cor
+    this.direction = 1;  // 1 = entrando
     this.spans = [];
     this.accentColor = getComputedStyle(document.documentElement)
       .getPropertyValue('--accent').trim() || '#d97706';
@@ -71,12 +71,12 @@ createSpan(char, isAccent) {
 
   animateTo(target) {
     this.direction = target === 1 ? 1 : -1;
-    if (this.rafId) return; // já está animando, só mudou direção
+    if (this.rafId) return; //muda direção da animação
     this.tick();
   }
 
   tick() {
-    // Velocidade: quanto o progresso avança por frame (60fps base)
+    // Velocidade: quanto o progresso avança por frame
     const speed = 0.013;
     this.progress = Math.min(1, Math.max(0, this.progress + this.direction * speed));
 
