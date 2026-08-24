@@ -482,7 +482,7 @@ a {
 .service-card:hover {
   transform: scale(1.06);
   border-color: var(--primary); /* Borda fica branca*/
-  box-shadow: 0 15px 35px -10px rgba(255, 255, 255, 0.1); /* Sombra */
+  box-shadow: 0 15px 35px -10px rgba(255, 255, 255, 0.1);
   z-index: 10; /* Garante que o card fique por cima */
 }
 
@@ -490,7 +490,7 @@ a {
   display: inline-flex;
   padding: 0.75rem;
   border-radius: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.08); /* Fundo sutil para o ícone */
+  background-color: rgba(255, 255, 255, 0.08); /* Fundo para o ícone */
   color: var(--primary);
   margin-bottom: 1rem;
   transition: transform 0.3s ease;
@@ -500,7 +500,7 @@ a {
   transform: scale(1.3) rotate(-7deg);
 }
 
-/* Inverte a cor dos ícones PNG para branco puro */
+/* Inverte a cor dos ícones PNG para branco */
 .service-icon img,
 .project-icon img,
 .contact-action-btn .action-icon img,
@@ -928,12 +928,12 @@ a {
 .foto-bolinha {
   width: 300px; /* Largura da bolinha */
   height: 300px; /* Altura da bolinha (deve ser igual à largura) */
-  border-radius: 50%; /* É isso que transforma o quadrado num círculo perfeito */
+  border-radius: 50%; 
   object-fit: cover; /* Impede que a foto fique esticada ou esmagada */
   border: 3px solid var(--primary); /* Borda branca ao redor */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* Sombra para dar profundidade */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
   margin-bottom: 1.5rem; /* Espaço entre a foto e o texto abaixo */
-  background-color: var(--card); /* Fundo caso a imagem demore a carregar */
+  background-color: var(--card);
 }
 
 *, *:hover, a, a:hover, button, button:hover {
