@@ -77,7 +77,7 @@ createSpan(char, isAccent) {
 
   tick() {
     // Velocidade: quanto o progresso avança por frame
-    const speed = 0.013;
+    const speed = 0.010;
     this.progress = Math.min(1, Math.max(0, this.progress + this.direction * speed));
 
     const total = this.spans.length;

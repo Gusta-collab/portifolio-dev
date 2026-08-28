@@ -37,41 +37,44 @@
   </header>
 
   <main>
-    <section class="hero" id="hero">
-      <div class="container hero-grid">
-        <div class="hero-text fade-in" style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
-          <img src="images/eu.jpg" alt="Foto de Gustavo" class="foto-bolinha" />
+<section class="hero" id="hero">
+  <div class="container hero-grid">
+    
+    <!-- COLUNA 1 -->
+    <div class="hero-text fade-in" style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+      <img src="images/eu.jpg" alt="Foto de Gustavo" class="foto-bolinha" />
 
-          <h1 class="hero-title hover-letter-weight">
-            <span class="accent"><i>Desenvolvedor</i> <br> Desktop</span>
-          </h1>
-          
-          <div class="hero-buttons" style="justify-content: flex-start;">
-            <a href="#projects" class="btn-primary">Ver projetos</a>
-            <a href="#contact" class="btn-secondary">Vamos conversar</a>
-          </div>
-        </div>
-        
-        <div class="hero-image fade-in stagger-2" style="position: relative; display: flex; justify-content: center; align-items: center; min-height: 500px; width: 100%;">
-          <div id="blackhole-container" style="position: absolute; width: 1100px; height: 1100px; max-width: none; pointer-events: none;">
-          </div>
-        </div>
+      <h1 class="hero-title hover-letter-weight" style="text-align: center;">Desenvolvedor<br>Desktop</h1>
+      
+      <div class="hero-buttons" style="display: flex; justify-content: flex-start; gap: 15px; margin-top: 15px;">
+        <a href="#projects" class="btn-primary">Ver projetos</a>
+        <a href="#contact" class="btn-secondary">Vamos conversar</a>
       </div>
-      <div class="scroll-indicator">
-        <div class="mouse">
-          <div class="wheel"></div>
-        </div>
-      </div>
+    </div>
+    <!-- Coluna 1 -->
 
-      <div id="custom-cursor" class="custom-cursor">
-        <div id="cursor-label" class="cursor-label">Gustavo</div>
-        <div id="cursor-arrow" class="cursor-arrow">
-          <svg width="31" height="31" viewBox="0 0 28 28" fill="none">
-            <path d="M5 3 L23 14 L14 16 L11 24 Z" fill="#ffffff" stroke="rgba(0,0,0,0.18)" stroke-width="0.6" stroke-linejoin="round" />
-          </svg>
-        </div>
+    <div class="hero-image fade-in stagger-2" style="position: relative; display: flex; justify-content: center; align-items: center; min-height: 500px; width: 100%;">
+      <div id="blackhole-container" style="position: absolute; width: 1100px; height: 1100px; max-width: none; pointer-events: none;">
       </div>
-    </section>
+    </div>
+    <!-- Coluna 2 -->
+  </div>
+  
+  <div class="scroll-indicator">
+    <div class="mouse">
+      <div class="wheel"></div>
+    </div>
+  </div>
+
+  <div id="custom-cursor" class="custom-cursor">
+    <div id="cursor-label" class="cursor-label">Gustavo</div>
+    <div id="cursor-arrow" class="cursor-arrow">
+      <svg width="31" height="31" viewBox="0 0 28 28" fill="none">
+        <path d="M5 3 L23 14 L14 16 L11 24 Z" fill="#ffffff" stroke="rgba(0,0,0,0.18)" stroke-width="0.6" stroke-linejoin="round" />
+      </svg>
+    </div>
+  </div>
+</section>
 
     <section class="about" id="about">
       <div class="container">
@@ -255,6 +258,16 @@
       </div>
     </section>
   </main>
+
+
+  <footer style="text-align: center; padding: 2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 2rem;">
+    <div class="container">
+      <p style="color: #a1a1aa; font-size: 0.9rem;">
+        &copy; <span id="year"></span> Gustavo Alexandre. Todos os direitos reservados.
+      </p>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
