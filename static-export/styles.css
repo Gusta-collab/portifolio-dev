@@ -1,4 +1,4 @@
-/* Design system: developer portfolio — dark theme, vibrant orange on deep charcoal */
+
 :root {
   --radius: 0.75rem;
   --background: #050505;         /* Preto profundo */
@@ -100,6 +100,7 @@ a {
   color: var(--foreground);
 }
 
+
 .nav-desktop {
   display: none;
   align-items: center;
@@ -121,6 +122,7 @@ a {
 
 .nav-desktop a:hover {
   color: var(--primary);
+  transform: scale(1.08);
 }
 
 .btn-primary {

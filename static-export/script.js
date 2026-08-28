@@ -77,7 +77,7 @@ createSpan(char, isAccent) {
 
   tick() {
     // Velocidade: quanto o progresso avança por frame
-    const speed = 0.010;
+    const speed = 0.030;
     this.progress = Math.min(1, Math.max(0, this.progress + this.direction * speed));
 
     const total = this.spans.length;
@@ -492,3 +492,22 @@ class BlackHoleAnimation {
     requestAnimationFrame(this.draw);
   }
 }
+
+// 
+  const waBtn = document.getElementById('whatsapp-btn');
+  if (waBtn) {
+    waBtn.addEventListener('click', (e) => {
+      e.preventDefault(); 
+      
+      // Quebrando 
+      const prefixo = "https://wa.me/";
+      const ddi = "55";
+      const ddd = "14";
+      const p1 = "99189";
+      const p2 = "5694";
+      
+      // Monta
+      const linkSeguro = prefixo + ddi + ddd + p1 + p2;
+      window.open(linkSeguro, '_blank', 'noopener,noreferrer');
+    });
+  }
