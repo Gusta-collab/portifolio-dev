@@ -133,16 +133,31 @@
       this.orbs = [];
       this.orbExpiryTimer = 0;
       this.orbPoints = this.createOrbPoints();
+      this.bgStars = this.createBgStars();
       this.shapes = {
-        reef: this.createPoints('reef'),
-        hammerhead: this.createPoints('hammerhead'),
+        reef: this.createAnatomy('reef'),
+        hammerhead: this.createAnatomy('hammerhead'),
       };
-      // beat: frequência da batida da cauda (rad/s); amp: amplitude relativa da ondulação.
-      // Fases separadas por um terço de volta e faixas mais amplas distribuem o cardume.
+      // Velocidade mais baixa e nado livre com raio de curva amplo (nunca gira sobre a cabeça)
       this.fish = [
-        { type: 'hammerhead', palette: 'hammerhead', x: 0.48, y: 0.48, rx: 0.39, ry: 0.34, phase: 3.5, speed: 0.12, size: 1.06, beat: 2.6, amp: 1.0 },
-        { type: 'reef', palette: 'reefBlue', x: 0.52, y: 0.49, rx: 0.38, ry: 0.34, phase: 3.5 + Math.PI * 2 / 3, speed: 0.12, size: 1.12, beat: 3.0, amp: 1.0 },
-        { type: 'reef', palette: 'reefTeal', x: 0.50, y: 0.53, rx: 0.36, ry: 0.35, phase: 3.5 + Math.PI * 4 / 3, speed: 0.12, size: 0.94, beat: 3.3, amp: 0.95 },
+        {
+          type: 'hammerhead', palette: 'hammerhead',
+          startX: 0.28, startY: 0.35, startHeading: 0.35,
+          phase: 0.8, speed: 0.052, size: 1.06, beat: 1.85, amp: 0.92,
+          seed1: randomBetween(0, 10), seed2: randomBetween(0, 10), seed3: randomBetween(0, 10),
+        },
+        {
+          type: 'reef', palette: 'reefBlue',
+          startX: 0.72, startY: 0.42, startHeading: 2.65,
+          phase: 2.9, speed: 0.055, size: 1.12, beat: 2.05, amp: 0.92,
+          seed1: randomBetween(0, 10), seed2: randomBetween(0, 10), seed3: randomBetween(0, 10),
+        },
+        {
+          type: 'reef', palette: 'reefTeal',
+          startX: 0.48, startY: 0.68, startHeading: -1.25,
+          phase: 5.0, speed: 0.058, size: 0.94, beat: 2.25, amp: 0.88,
+          seed1: randomBetween(0, 10), seed2: randomBetween(0, 10), seed3: randomBetween(0, 10),
+        },
       ];
       // Tons discretos próximos à referência: azul profundo e amarelo-oliva.
       // 0–5: corpo; 6: tom intermediário; 7–10: detalhes coloridos esparsos.
@@ -157,14 +172,10 @@
         hammerhead: ['#a6a755', '#8e9d4f', '#5f7b99', '#a88761'],
       };
       this.fish.forEach(fish => {
-        fish.twinkles = new Map();
-        fish.pointCooldowns = new Map();
-        fish.nextTwinkleAt = randomBetween(1, 3.5);
-        fish.twinkleCandidates = this.shapes[fish.type].twinkleCandidates;
         const columns = this.shapes[fish.type].columns;
         fish.raw = columns.map(() => ({ x: 0, y: 0 }));
-        fish.spine = columns.map(() => ({ x: 0, y: 0 }));
         fish.nodes = columns.map(() => ({ x: 0, y: 0, nx: 0, ny: 1 }));
+        this.initFishPath(fish);
       });
       this.draw = this.draw.bind(this);
       this.sync = this.sync.bind(this);
@@ -184,22 +195,117 @@
       this.resize();
     }
 
+    // Cria o histórico inicial para que os tubarões já comecem completamente esticados em t=0
+    initFishPath(fish) {
+      const dt = 0.05;
+      const backSteps = Math.round(18 / dt);
+      let rx = fish.startX, ry = fish.startY, rHeading = fish.startHeading;
+      const preHistory = [{ t: 0, x: rx, y: ry, heading: rHeading, speed: fish.speed }];
+      for (let i = 1; i <= backSteps; i++) {
+        const t = -i * dt;
+        const wanderTurn = 0.08 * Math.sin(t * 0.25 + fish.seed1) + 0.06 * Math.cos(t * 0.18 + fish.seed2);
+        rHeading -= wanderTurn * dt;
+        rx -= Math.cos(rHeading) * fish.speed * dt;
+        ry -= Math.sin(rHeading) * fish.speed * dt;
+        preHistory.push({ t, x: rx, y: ry, heading: rHeading, speed: fish.speed });
+      }
+      fish.history = preHistory.reverse();
+    }
+
+    // Simula o nado com curvas bem abertas e suaves para nunca girar em falso sobre a cabeça
+    advanceFishPath(fish, targetTime) {
+      const dt = 0.04;
+      let last = fish.history[fish.history.length - 1];
+      while (last.t < targetTime + 0.2) {
+        const t = last.t + dt;
+        // Velocidade calma e constante (sem freadas)
+        const speed = fish.speed * (1 + 0.08 * Math.sin(t * 0.22 + fish.phase));
+
+        // Mudança de direção suave pelo espaço
+        let desiredTurn = 0.14 * Math.sin(t * 0.21 + fish.seed1)
+          + 0.11 * Math.cos(t * 0.34 + fish.seed2)
+          + 0.08 * Math.sin(t * 0.13 + fish.seed3);
+
+        // Sensor suave de bordas: começa a curvar com bastante antecedência
+        const lookAhead = 0.28;
+        const futureX = last.x + Math.cos(last.heading) * lookAhead;
+        const futureY = last.y + Math.sin(last.heading) * lookAhead;
+        const margin = 0.18;
+
+        if (futureX < margin || futureX > 1 - margin || futureY < margin || futureY > 1 - margin) {
+          // Aponta suavemente para uma zona interna ampla
+          const targetX = 0.5 + 0.16 * Math.sin(t * 0.17 + fish.seed1);
+          const targetY = 0.5 + 0.16 * Math.cos(t * 0.19 + fish.seed2);
+          const angleToInner = Math.atan2(targetY - last.y, targetX - last.x);
+          const diff = angleDifference(angleToInner, last.heading);
+          const outX = Math.max(0, margin - futureX, futureX - (1 - margin)) / margin;
+          const outY = Math.max(0, margin - futureY, futureY - (1 - margin)) / margin;
+          const pull = clamp(Math.hypot(outX, outY), 0, 1);
+          desiredTurn = desiredTurn * (1 - pull) + clamp(diff * 0.85, -0.26, 0.26) * (0.4 + 0.6 * pull);
+        }
+
+        // Limite estrito de curvatura: garante que o raio mínimo da curva seja sempre grande
+        const turnRate = clamp(desiredTurn, -0.24, 0.24);
+        const heading = last.heading + turnRate * dt;
+        const x = last.x + Math.cos(heading) * speed * dt;
+        const y = last.y + Math.sin(heading) * speed * dt;
+
+        last = { t, x, y, heading, speed };
+        fish.history.push(last);
+      }
+
+      const minTime = targetTime - 22;
+      while (fish.history.length > 4 && fish.history[1].t < minTime) {
+        fish.history.shift();
+      }
+    }
+
+    // Cria os pontos do clique em camadas fixas e bem próximas umas das outras.
     createOrbPoints() {
-      const points = [];
+      const points = [
+        { x: 0, y: 0, color: 2, cross: false, threshold: 0.0 }
+      ];
       const rings = [
-        { radius: 0.64, count: 16, offset: 0.12 },
-        { radius: 0.82, count: 24, offset: 0.04 },
-        { radius: 1, count: 32, offset: 0 },
+        { radius: 0.20, count: 6, offset: 0.0, threshold: 0.12 },
+        { radius: 0.39, count: 12, offset: 0.26, threshold: 0.28 },
+        { radius: 0.58, count: 16, offset: 0.08, threshold: 0.46 },
+        { radius: 0.78, count: 22, offset: 0.15, threshold: 0.66 },
+        { radius: 0.96, count: 28, offset: 0.0, threshold: 0.84 },
       ];
       rings.forEach(ring => {
         for (let i = 0; i < ring.count; i++) {
           const angle = i / ring.count * Math.PI * 2 + ring.offset;
           const radius = ring.radius + randomBetween(-0.012, 0.012);
           const seed = Math.random();
-          points.push({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, color: seed < 0.65 ? 0 : seed < 0.9 ? 1 : 2, cross: seed > 0.92 });
+          const threshold = clamp(ring.threshold + randomBetween(-0.03, 0.03), 0.02, 0.94);
+          points.push({
+            x: Math.cos(angle) * radius,
+            y: Math.sin(angle) * radius,
+            color: seed < 0.65 ? 0 : seed < 0.9 ? 1 : 2,
+            cross: seed > 0.90,
+            threshold,
+          });
         }
       });
       return points;
+    }
+
+    // Pontos de fundo com cintilação harmônica (mesma paleta dos tubarões)
+    createBgStars() {
+      const stars = [];
+      const colors = ['#4b86bd', '#4c83ad', '#649047', '#9b914a', '#8e67af', '#5f7b99', '#a6a755'];
+      for (let i = 0; i < 48; i++) {
+        stars.push({
+          xRatio: (i * 139.17 + 37) % 1000 / 1000,
+          yRatio: (i * 83.31 + 17) % 1000 / 1000,
+          baseColor: i % 3 ? 'rgba(68,102,147,0.28)' : 'rgba(141,153,163,0.24)',
+          twinkleColor: colors[i % colors.length],
+          period: 3.2 + (i * 19 % 55) * 0.1,
+          phase: (i * 31.7) % 10,
+          cross: i % 4 !== 0,
+        });
+      }
+      return stars;
     }
 
     onSurfaceClick(event) {
@@ -208,7 +314,7 @@
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
       if (!rect.width || !rect.height || x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-      this.orbs.push({ x: x / rect.width, y: y / rect.height, born: performance.now(), duration: 2200 });
+      this.orbs.push({ x: x / rect.width, y: y / rect.height, born: performance.now(), duration: 1100 });
       if (this.orbs.length > 8) this.orbs.shift();
       this.render();
       this.scheduleOrbExpiry();
@@ -227,62 +333,33 @@
       }, Math.max(20, next - performance.now() + 20));
     }
 
-    createPoints(type) {
+    // Pré-calcula a tabela anatômica contínua do tubarão para consultar rapidamente
+    // quais pontos estáticos do mapa estão dentro do corpo dele a cada frame.
+    createAnatomy(type) {
       const spec = SPECIES[type];
       const bodyHalf = smoothProfile(spec.body);
       const fins = spec.fins.map(d => parsePath(d));
-      const inFin = (x, ay) => fins.some(polygon => insidePolygon(polygon, x, -ay));
       const columnStep = 4.0;
-      const rowStep = 4.6;
       const columns = [];
-      const points = [];
-      const twinkleCandidates = [];
-      // Grade hexagonal: parece um pontilhado orgânico em vez de uma malha quadrada.
+
       for (let x = spec.start, c = 0; x <= SHAPE_LENGTH; x += columnStep, c++) {
-        const column = { index: c, x, tail: (x - spec.start) / (SHAPE_LENGTH - spec.start), half: bodyHalf(x), extent: 0 };
-        columns.push(column);
-        const offset = c % 2 ? 0.5 : 0;
-        const rows = [];
-        for (let row = -24; row <= 24; row++) {
-          const y = (row + offset) * rowStep;
-          const ay = Math.abs(y);
-          if ((column.half > 0 && ay <= column.half) || inFin(x, ay)) rows.push(y);
+        const half = bodyHalf(x);
+        let maxExtent = half;
+        for (let ay = 0; ay <= 90; ay += 1.5) {
+          if (ay <= half || fins.some(poly => insidePolygon(poly, x, -ay))) {
+            maxExtent = Math.max(maxExtent, ay);
+          }
         }
-        column.extent = rows.reduce((max, y) => Math.max(max, Math.abs(y)), 0) + rowStep / 2;
-        rows.forEach(y => {
-          const ay = Math.abs(y);
-          const seed = Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1;
-          const tail = clamp((x - spec.tailStart) / 50);
-          const onFin = ay > column.half || x > spec.tailStart;
-          let shade, fin = 0, edge = 0;
-          if (!onFin) {
-            // Contrassombreamento: dorso escuro no centro, flancos mais claros.
-            shade = 0.06 + 0.66 * Math.pow(clamp(ay / Math.max(column.half, 1)), 1.25);
-          } else {
-            // Nadadeiras e cauda clareiam em direção às pontas, sem sumir no fundo.
-            const base = x > spec.tailStart ? 0 : column.half;
-            edge = clamp((ay - base) / Math.max(column.extent - base, 1));
-            shade = 0.4 + 0.42 * edge;
-            fin = clamp((ay - column.half) / 14) * (1 - tail);
-          }
-          shade = clamp(shade + (seed - 0.5) * 0.22);
-          let color = Math.min(5, Math.floor(shade * 6));
-          // A maior parte do corpo conserva sua cor. Cerca de 12% dos pontos
-          // recebe variações oliva, verdes, violetas e âmbar, sem faixas artificiais.
-          const accentSeed = Math.abs(Math.sin(x * 57.13 + y * 11.97) * 24634.6345) % 1;
-          if (accentSeed >= 0.88) {
-            color = accentSeed < 0.93 ? 7 : accentSeed < 0.965 ? 8 : accentSeed < 0.99 ? 9 : 10;
-          }
-          // Pontos maiores no escuro e menores no claro dão volume, como um meio-tom.
-          let radius = onFin ? 0.95 + 0.4 * (1 - edge) : 0.72 + 0.78 * (1 - Math.pow(shade, 1.3));
-          const ridge = ay <= rowStep * 0.55 && spec.ridges.some(([a, b]) => x >= a && x <= b);
-          if (ridge) { color = 4; radius = 1.15; }
-          const pectoral = ay > column.half && insidePolygon(fins[0], x, -ay);
-          if (!onFin && x > 40 && x < spec.tailStart - 15) twinkleCandidates.push(points.length);
-          points.push({ column, y, color, radius, fin, tail, pectoral, cross: !ridge && seed > 0.91 });
+        columns.push({
+          index: c,
+          x,
+          tail: (x - spec.start) / (SHAPE_LENGTH - spec.start),
+          half,
+          extent: maxExtent + 2.3,
         });
       }
-      return { points, columns, twinkleCandidates };
+
+      return { spec, bodyHalf, fins, columns, columnStep };
     }
 
     resize() {
@@ -306,42 +383,45 @@
     }
 
     draw(now) {
-      // Acompanha a taxa de atualização da tela, com movimento baseado no tempo.
       if (this.last) this.elapsed += Math.min((now - this.last) / 1000, 0.05);
       this.last = now;
       this.render();
       this.frame = requestAnimationFrame(this.draw);
     }
 
+    // Interpola a posição e direção do tubarão em qualquer instante do histórico
     pose(fish, time, w, h) {
-      // O ritmo médio é compartilhado para que os tubarões não se alcancem.
-      // Uma pequena variação individual mantém acelerações naturais e espaçadas.
-      const slowWave = time * 0.21 + 1.3;
-      const longWave = time * 0.083 + 2.1;
-      const individualWave = time * 0.17 + fish.phase;
-      const phase = fish.phase + fish.speed * (
-        time + 0.24 / 0.21 * (Math.cos(1.3) - Math.cos(slowWave))
-        + 0.08 / 0.083 * (Math.cos(2.1) - Math.cos(longWave))
-      ) + 0.10 * (Math.sin(individualWave) - Math.sin(fish.phase));
-      const rate = fish.speed * (1 + 0.24 * Math.sin(slowWave) + 0.08 * Math.sin(longWave))
-        + 0.017 * Math.cos(individualWave);
-      // Uma volta ampla com pequenas variações evita uma órbita perfeitamente mecânica.
-      const ripple = phase * 2 + fish.phase;
+      this.advanceFishPath(fish, time);
+      const hist = fish.history;
+      let low = 0, high = hist.length - 2;
+      while (low <= high) {
+        const mid = (low + high) >> 1;
+        if (hist[mid + 1].t < time) low = mid + 1;
+        else if (hist[mid].t > time) high = mid - 1;
+        else { low = mid; break; }
+      }
+      const idx = clamp(low, 0, hist.length - 2);
+      const a = hist[idx];
+      const b = hist[idx + 1];
+      const f = clamp((time - a.t) / Math.max(b.t - a.t, 1e-6));
+
+      const x = a.x + (b.x - a.x) * f;
+      const y = a.y + (b.y - a.y) * f;
+      const heading = a.heading + angleDifference(b.heading, a.heading) * f;
+      const speed = a.speed + (b.speed - a.speed) * f;
+
       return {
-        x: w * (fish.x + Math.cos(phase) * fish.rx + Math.sin(ripple) * 0.015),
-        y: h * (fish.y + Math.sin(phase) * fish.ry + Math.cos(ripple) * 0.025),
-        dx: w * (-Math.sin(phase) * fish.rx + Math.cos(ripple) * 0.03),
-        dy: h * (Math.cos(phase) * fish.ry - Math.sin(ripple) * 0.05),
-        rate,
+        x: w * x,
+        y: h * y,
+        dx: w * Math.cos(heading),
+        dy: h * Math.sin(heading),
+        rate: speed,
       };
     }
 
     /*
-     * Corpo flexível em duas etapas:
-     * 1) a coluna segue o rastro da cabeça (como um tubarão de verdade, o corpo
-     *    percorre o caminho da cabeça), com curvatura suavemente limitada;
-     * 2) uma onda viaja da cabeça à cauda, com amplitude crescente, e os pontos
-     *    giram junto com a coluna, então o corpo realmente dobra.
+     * Atualiza a espinha dorsal seguindo fielmente o caminho percorrido pela cabeça
+     * (sem recalcular desvios artificiais em torno da cabeça, eliminando o giro em falso).
      */
     updateBody(fish, columns, time, w, h, scale) {
       const count = columns.length;
@@ -349,16 +429,17 @@
       const longitudinalScale = scale * BODY_COMPRESSION;
       const bodyLength = (columns[count - 1].x - columns[0].x) * longitudinalScale;
       const speed = Math.max(Math.hypot(pose.dx, pose.dy) * pose.rate, 1);
-      const stepLength = 5 * scale;
-      const dt = clamp(stepLength / speed, 0.01, 0.6);
+      const stepLength = 4.5 * scale;
+      const dt = clamp(stepLength / speed, 0.01, 0.25);
 
-      // Rastro da cabeça, medido em comprimento de arco.
+      // Rastro real da cabeça no espaço, medido em comprimento de arco exato
       const trail = [{ x: pose.x, y: pose.y, s: 0 }];
-      for (let j = 1; trail[trail.length - 1].s < bodyLength + stepLength && j < 220; j++) {
+      for (let j = 1; trail[trail.length - 1].s < bodyLength + stepLength * 2 && j < 260; j++) {
         const p = this.pose(fish, time - j * dt, w, h);
         const prev = trail[trail.length - 1];
         trail.push({ x: p.x, y: p.y, s: prev.s + Math.hypot(p.x - prev.x, p.y - prev.y) });
       }
+
       const raw = fish.raw;
       let k = 0;
       for (let i = 0; i < count; i++) {
@@ -370,44 +451,31 @@
         raw[i].y = a.y + (b.y - a.y) * f;
       }
 
-      // Curvatura limitada de forma suave (tanh): curvas leves passam intactas,
-      // curvas fechadas demais são suavizadas em vez de dobrar o corpo em "U".
-      const spine = fish.spine;
-      const heading = Math.atan2(-pose.dy, -pose.dx);
-      spine[0].x = raw[0].x;
-      spine[0].y = raw[0].y;
-      let previousAngle = heading;
-      let deviation = 0;
-      let bendMid = 0;
-      for (let i = 1; i < count; i++) {
-        const angle = Math.atan2(raw[i].y - raw[i - 1].y, raw[i].x - raw[i - 1].x);
-        deviation += angleDifference(angle, previousAngle);
-        previousAngle = angle;
-        const u = columns[i].tail;
-        if (u <= 0.6) bendMid = deviation;
-        const limit = 0.45 + 0.9 * u;
-        const soft = limit * Math.tanh(deviation / limit);
-        const segment = (columns[i].x - columns[i - 1].x) * longitudinalScale;
-        spine[i].x = spine[i - 1].x + Math.cos(heading + soft) * segment;
-        spine[i].y = spine[i - 1].y + Math.sin(heading + soft) * segment;
-      }
+      // Mede a inclinação da curva no meio do corpo para animar as nadadeiras
+      const headAngle = Math.atan2(raw[2].y - raw[0].y, raw[2].x - raw[0].x);
+      const midIdx = Math.min(35, count - 1);
+      const midAngle = Math.atan2(raw[midIdx].y - raw[midIdx - 2].y, raw[midIdx].x - raw[midIdx - 2].x);
+      const bendMid = angleDifference(midAngle, headAngle);
 
-      // Onda de natação: amplitude pequena na cabeça e grande na cauda.
+      // Onda de natação que viaja da metade posterior até a ponta da cauda
       const nodes = fish.nodes;
-      const amplitude = SHAPE_LENGTH * 0.092 * scale * fish.amp * (1 + 0.1 * Math.sin(time * 0.31 + fish.phase));
-      const wavePhase = u => 5.2 * u - fish.beat * time + fish.phase;
+      const amplitude = SHAPE_LENGTH * 0.082 * scale * fish.amp * (1 + 0.08 * Math.sin(time * 0.25 + fish.phase));
+      const wavePhase = u => 5.0 * u - fish.beat * time + fish.phase;
+
       for (let i = 0; i < count; i++) {
-        const previous = spine[Math.max(i - 1, 0)];
-        const following = spine[Math.min(i + 1, count - 1)];
+        const previous = raw[Math.max(i - 1, 0)];
+        const following = raw[Math.min(i + 1, count - 1)];
         const dx = following.x - previous.x, dy = following.y - previous.y;
         const length = Math.hypot(dx, dy) || 1;
         const u = columns[i].tail;
-        const tailFlex = clamp((u - 0.38) / 0.62);
-        const bend = amplitude * (0.015 + 0.985 * Math.pow(tailFlex, 1.8)) * Math.sin(wavePhase(u));
-        nodes[i].x = spine[i].x - dy / length * bend;
-        nodes[i].y = spine[i].y + dx / length * bend;
+        // A cabeça do tubarão-martelo (u < 0.12) não ondula lateralmente, mantendo-se firme
+        const startFlex = fish.type === 'hammerhead' ? 0.28 : 0.20;
+        const tailFlex = clamp((u - startFlex) / (1 - startFlex));
+        const bend = amplitude * Math.pow(tailFlex, 1.85) * Math.sin(wavePhase(u));
+        nodes[i].x = raw[i].x - dy / length * bend;
+        nodes[i].y = raw[i].y + dx / length * bend;
       }
-      // As normais saem da curva já ondulada, para a seção do corpo girar com ela.
+
       for (let i = 0; i < count; i++) {
         const previous = nodes[Math.max(i - 1, 0)];
         const following = nodes[Math.min(i + 1, count - 1)];
@@ -416,40 +484,123 @@
         nodes[i].nx = -dy / length;
         nodes[i].ny = dx / length;
       }
+
       return {
-        // Na curva, a nadadeira de dentro "afunda" e a de fora se estende.
-        bank: clamp(bendMid / 0.8, -1, 1),
-        // A caudal abre mais quando atravessa o centro da batida.
-        spread: 0.72 + 0.28 * Math.abs(Math.cos(wavePhase(1))),
+        bank: clamp(bendMid / 0.65, -1, 1),
+        spread: 0.74 + 0.26 * Math.abs(Math.cos(wavePhase(1))),
       };
     }
 
-    updateTwinkles(fish, time) {
-      if (this.motion.matches) return;
-      for (const [index, twinkle] of fish.twinkles) {
-        if (time > twinkle.start + twinkle.duration) fish.twinkles.delete(index);
+    // Avalia se um ponto estático do mapa (px, py) está dentro da anatomia do tubarão
+    // e retorna a cor, tamanho e símbolo correspondente naquele instante.
+    sampleStaticPoint(fish, anatomy, px, py, scale, bank, spread, t) {
+      const { spec, fins, columns } = anatomy;
+      const nodes = fish.nodes;
+      const count = columns.length;
+
+      // 1) Busca rápida pela coluna da espinha dorsal mais próxima de (px, py)
+      let bestI = 0;
+      let bestDistSq = Infinity;
+      for (let i = 0; i < count; i += 3) {
+        const dx = px - nodes[i].x;
+        const dy = py - nodes[i].y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < bestDistSq) {
+          bestDistSq = d2;
+          bestI = i;
+        }
       }
-      for (const [index, until] of fish.pointCooldowns) {
-        if (time > until) fish.pointCooldowns.delete(index);
+      const startI = Math.max(0, bestI - 3);
+      const endI = Math.min(count - 1, bestI + 3);
+      for (let i = startI; i <= endI; i++) {
+        const dx = px - nodes[i].x;
+        const dy = py - nodes[i].y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < bestDistSq) {
+          bestDistSq = d2;
+          bestI = i;
+        }
       }
-      if (time < fish.nextTwinkleAt) return;
-      // As piscadas se concentram no tronco, com escolha e ritmo independentes.
-      const candidates = fish.twinkleCandidates;
-      const count = Math.min(2 + Math.floor(Math.random() * 3), 8 - fish.twinkles.size);
-      let added = 0;
-      for (let attempt = 0; attempt < count * 5 && added < count && candidates.length; attempt++) {
-        const index = candidates[Math.floor(Math.random() * candidates.length)];
-        if (fish.twinkles.has(index) || fish.pointCooldowns.has(index)) continue;
-        const start = time + randomBetween(0, 0.9);
-        const duration = randomBetween(1.1, 1.9);
-        const palette = this.twinklePalettes[fish.palette];
-        fish.twinkles.set(index, {
-          start, duration, color: palette[Math.floor(Math.random() * palette.length)],
-        });
-        fish.pointCooldowns.set(index, start + duration + randomBetween(10, 22));
-        added++;
+
+      // 2) Converte a coordenada de tela (px, py) para a coordenada anatômica local (bodyX, bodyY)
+      let bodyX, bodyY, column;
+      // Verifica primeiro se está na região da cabeça rígida do tubarão-martelo
+      if (fish.type === 'hammerhead' && bestI <= 12) {
+        const headAnchor = nodes[6];
+        const headAnchorX = columns[6].x;
+        const dx = (px - headAnchor.x) / scale;
+        const dy = (py - headAnchor.y) / scale;
+        const along = dx * headAnchor.ny - dy * headAnchor.nx;
+        const candidateX = headAnchorX + along / BODY_COMPRESSION;
+        if (candidateX >= spec.start && candidateX <= 36) {
+          bodyX = candidateX;
+          bodyY = dx * headAnchor.nx + dy * headAnchor.ny;
+          const colIdx = clamp(Math.round((bodyX - spec.start) / 4.0), 0, count - 1);
+          column = columns[colIdx];
+        }
       }
-      fish.nextTwinkleAt = time + randomBetween(2.2, 4.8);
+
+      if (bodyX === undefined) {
+        const node = nodes[bestI];
+        column = columns[bestI];
+        const dx = (px - node.x) / scale;
+        const dy = (py - node.y) / scale;
+        const along = dx * node.ny - dy * node.nx;
+        // Se o ponto está muito longe longitudinalmente do segmento mais próximo, está fora do tubarão
+        if (Math.abs(along) > 5.5) return null;
+        bodyX = column.x + along / BODY_COMPRESSION;
+        if (bodyX < spec.start || bodyX > SHAPE_LENGTH) return null;
+        const spreadFactor = 1 + column.tail * (spread - 1);
+        bodyY = (dx * node.nx + dy * node.ny) / Math.max(spreadFactor, 0.5);
+      }
+
+      const ay = Math.abs(bodyY);
+      if (ay > column.extent) return null;
+
+      // 3) Verifica se (bodyX, ay) pertence ao tronco ou a alguma das nadadeiras
+      const inBody = column.half > 0 && ay <= column.half;
+      const inFin = !inBody && fins.some(poly => insidePolygon(poly, bodyX, -ay));
+      if (!inBody && !inFin) return null;
+
+      // 4) Calcula cor, sombreamento e destaque exatamente como no modelo original
+      const onFin = ay > column.half || bodyX > spec.tailStart;
+      let shade, edge = 0;
+      if (!onFin) {
+        shade = 0.06 + 0.66 * Math.pow(clamp(ay / Math.max(column.half, 1)), 1.25);
+      } else {
+        const base = bodyX > spec.tailStart ? 0 : column.half;
+        edge = clamp((ay - base) / Math.max(column.extent - base, 1));
+        shade = 0.4 + 0.42 * edge;
+      }
+
+      // Semente estática baseada na posição do ponto no mapa
+      const mapSeed = Math.abs(Math.sin(px * 12.9898 + py * 78.233) * 43758.5453) % 1;
+      shade = clamp(shade + (mapSeed - 0.5) * 0.22);
+      let color = Math.min(5, Math.floor(shade * 6));
+
+      const accentSeed = Math.abs(Math.sin(px * 57.13 + py * 11.97) * 24634.6345) % 1;
+      if (accentSeed >= 0.88) {
+        color = accentSeed < 0.93 ? 7 : accentSeed < 0.965 ? 8 : accentSeed < 0.99 ? 9 : 10;
+      }
+
+      let radius = onFin ? 0.95 + 0.4 * (1 - edge) : 0.72 + 0.78 * (1 - Math.pow(shade, 1.3));
+      const ridge = ay <= 2.5 && spec.ridges.some(([a, b]) => bodyX >= a && bodyX <= b);
+      if (ridge) { color = 4; radius = 1.15; }
+
+      // Suaviza o surgimento nas bordas externas para que a entrada dos pontos seja fluida
+      const boundaryDist = inBody ? (column.half - ay) : 2.5;
+      const edgeAppear = clamp((boundaryDist + 1.2) / 2.0, 0.35, 1);
+
+      // Multiplica o raio do símbolo por 1.48 sem alterar o tamanho do corpo do tubarão
+      const symbolBoost = 1.48;
+
+      return {
+        color,
+        radius: radius * symbolBoost * scale * edgeAppear,
+        onFin,
+        bodyX,
+        tailStart: spec.tailStart,
+      };
     }
 
     render() {
@@ -458,80 +609,158 @@
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
       const t = this.elapsed;
-      // Pequenos sinais de fundo, na mesma linguagem dos pontos dos tubarões.
-      for (let i = 0; i < 36; i++) {
-        const x = ((i * 139.17 + 37) % w);
-        const y = ((i * 83.31 + 17) % h);
-        ctx.strokeStyle = i % 3 ? 'rgba(68,102,147,0.28)' : 'rgba(141,153,163,0.24)';
+
+      // Espaço onde eles nadam: pontos estáticos de fundo + efeito de pisca harmônico
+      this.bgStars.forEach(star => {
+        const x = star.xRatio * w;
+        const y = star.yRatio * h;
+        ctx.strokeStyle = star.baseColor;
         ctx.lineWidth = 0.6;
         ctx.beginPath();
-        ctx.moveTo(x - 1.3, y); ctx.lineTo(x + 1.3, y);
-        ctx.moveTo(x, y - 1.3); ctx.lineTo(x, y + 1.3);
+        if (star.cross) {
+          ctx.moveTo(x - 1.3, y); ctx.lineTo(x + 1.3, y);
+          ctx.moveTo(x, y - 1.3); ctx.lineTo(x, y + 1.3);
+        } else {
+          ctx.arc(x, y, 0.9, 0, Math.PI * 2);
+        }
         ctx.stroke();
-      }
+
+        if (!this.motion.matches) {
+          const cycle = (t + star.phase) % star.period;
+          const twDuration = 1.6;
+          if (cycle < twDuration) {
+            const alpha = Math.pow(Math.sin((cycle / twDuration) * Math.PI), 2);
+            ctx.save();
+            ctx.globalAlpha = alpha * 0.78;
+            ctx.strokeStyle = star.twinkleColor;
+            ctx.shadowColor = star.twinkleColor;
+            ctx.shadowBlur = 2.5;
+            ctx.lineWidth = 0.95;
+            ctx.beginPath();
+            if (star.cross) {
+              ctx.moveTo(x - 1.6, y); ctx.lineTo(x + 1.6, y);
+              ctx.moveTo(x, y - 1.6); ctx.lineTo(x, y + 1.6);
+            } else {
+              ctx.arc(x, y, 1.15, 0, Math.PI * 2);
+            }
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      });
+
       const small = w < 600;
+      const baseScale = clamp(w / 1280, 0.5, 1.05);
+      // Espaçamento da grade hexagonal aumentado para dar mais respiro entre os símbolos,
+      // mantendo o tamanho real dos tubarões (scale) intacto.
+      const gridStepX = 6.8 * baseScale;
+      const gridStepY = 7.2 * baseScale;
+
       this.fish.forEach(fish => {
-        const { points, columns } = this.shapes[fish.type];
+        const anatomy = this.shapes[fish.type];
         const palette = this.palettes[fish.palette];
-        const scale = clamp(w / 1280, 0.5, 1.05) * fish.size;
-        const { bank, spread } = this.updateBody(fish, columns, t, w, h, scale);
-        this.updateTwinkles(fish, t);
+        const twinklePalette = this.twinklePalettes[fish.palette];
+        const scale = baseScale * fish.size;
+        const { bank, spread } = this.updateBody(fish, anatomy.columns, t, w, h, scale);
+
+        // Calcula a caixa delimitadora (bounding box) atual do tubarão para iterar
+        // apenas sobre os pontos estáticos do mapa próximos a ele.
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        const margin = 88 * scale;
         const nodes = fish.nodes;
-        const pectoralAnchor = nodes[Math.round((126 - columns[0].x) / 4)];
-        const anchorX = columns[Math.round((126 - columns[0].x) / 4)].x;
-        // As peitorais usam um apoio rígido no tronco e apenas uma oscilação discreta.
-        const flutter = [Math.sin(t * 0.9 + fish.phase), Math.sin(t * 0.9 + fish.phase + 1.3)];
+        for (let i = 0; i < nodes.length; i += 2) {
+          const nx = nodes[i].x, ny = nodes[i].y;
+          if (nx < minX) minX = nx;
+          if (nx > maxX) maxX = nx;
+          if (ny < minY) minY = ny;
+          if (ny > maxY) maxY = ny;
+        }
+        minX = Math.max(0, minX - margin);
+        maxX = Math.min(w, maxX + margin);
+        minY = Math.max(0, minY - margin);
+        maxY = Math.min(h, maxY + margin);
+
+        const cStart = Math.floor(minX / gridStepX);
+        const cEnd = Math.ceil(maxX / gridStepX);
+        const rStart = Math.floor(minY / gridStepY);
+        const rEnd = Math.ceil(maxY / gridStepY);
 
         ctx.save();
-        const discs = palette.map(() => new Path2D());
-        const crosses = palette.map(() => new Path2D());
+        // Separamos caminhos de contorno (bolinhas vazadas, '+', 'x') e preenchidos (bolinhas cheias)
+        const strokePaths = palette.map(() => new Path2D());
+        const fillPaths = palette.map(() => new Path2D());
         const highlights = [];
-        points.forEach((point, pointIndex) => {
-          const node = point.pectoral ? pectoralAnchor : nodes[point.column.index];
-          const side = point.y < 0 ? -1 : 1;
-          // Cada ponto acompanha a curvatura do corpo, e as nadadeiras têm vida própria.
-          let lateral = point.y * (1 + point.tail * (spread - 1));
-          let along = point.pectoral ? (point.column.x - anchorX) * BODY_COMPRESSION : 0;
-          if (point.fin > 0) {
-            const movement = point.pectoral ? 0.18 : 1;
-            lateral *= 1 - bank * side * 0.17 * point.fin * movement + flutter[side < 0 ? 0 : 1] * 0.05 * point.fin * movement;
-            along += Math.abs(point.y) * 0.1 * point.fin * movement * (flutter[side < 0 ? 1 : 0] - bank * side * 0.8);
+
+        for (let c = cStart; c <= cEnd; c++) {
+          const px = c * gridStepX;
+          const rowOffset = (c & 1) ? 0.5 * gridStepY : 0;
+          for (let r = rStart; r <= rEnd; r++) {
+            const py = r * gridStepY + rowOffset;
+            const sample = this.sampleStaticPoint(fish, anatomy, px, py, scale, bank, spread, t);
+            if (!sample) continue;
+
+            // Mutação aleatória de forma ao longo do tempo conforme o tubarão nada:
+            // 0 = bolinha vazada, 1 = bolinha preenchida, 2 = '+', 3 = 'x'
+            const cellHash = Math.abs(Math.sin(c * 127.1 + r * 311.7) * 43758.5453);
+            const morphSpeed = 0.7 + (cellHash % 1) * 0.9;
+            const morphPhase = (cellHash * 17.3) % 10 + (this.motion.matches ? 0 : t * morphSpeed);
+            const stateRoll = Math.abs(Math.sin(morphPhase)) % 1;
+
+            let shapeType = 0; // Bolinha vazada (padrão)
+            if (stateRoll > 0.84) {
+              shapeType = 2; // '+'
+            } else if (stateRoll > 0.68) {
+              shapeType = 3; // 'x'
+            } else if (stateRoll > 0.48) {
+              shapeType = 1; // Bolinha preenchida
+            }
+
+            if (shapeType === 1) {
+              this.drawSymbol(fillPaths[sample.color], shapeType, px, py, sample.radius);
+            } else {
+              this.drawSymbol(strokePaths[sample.color], shapeType, px, py, sample.radius);
+            }
+
+            // Cintilação de luzes no tronco do tubarão sobre a grade estática
+            if (!this.motion.matches && !sample.onFin && sample.bodyX > 32 && sample.bodyX < sample.tailStart - 15) {
+              const twPeriod = 4.5 + ((cellHash * 29) % 1) * 6.5;
+              const twCycle = (t + (cellHash * 53) % twPeriod) % twPeriod;
+              const twDur = 1.35;
+              if (twCycle < twDur && ((c * 19 + r * 37) % 9 === 0)) {
+                const alpha = Math.pow(Math.sin((twCycle / twDur) * Math.PI), 2);
+                const hPath = new Path2D();
+                this.drawSymbol(hPath, shapeType, px, py, sample.radius * 1.22);
+                const twColor = twinklePalette[(c + r) % twinklePalette.length];
+                highlights.push({ path: hPath, alpha, color: twColor, filled: shapeType === 1 });
+              }
+            }
           }
-          lateral *= scale; along *= scale;
-          const x = node.x + node.nx * lateral + node.ny * along;
-          const y = node.y + node.ny * lateral - node.nx * along;
-          const radius = point.radius * scale;
-          this.drawPoint(point.cross ? crosses[point.color] : discs[point.color], point, x, y, radius);
-          const twinkle = !this.motion.matches && fish.twinkles.get(pointIndex);
-          if (twinkle && t >= twinkle.start) {
-            const progress = clamp((t - twinkle.start) / twinkle.duration);
-            const alpha = Math.pow(Math.sin(progress * Math.PI), 2);
-            const path = new Path2D();
-            this.drawPoint(path, point, x, y, radius * 1.18);
-            highlights.push({ path, alpha, color: twinkle.color });
-          }
-        });
-        ctx.globalAlpha = (0.84 + Math.sin(t * 0.65 + fish.phase) * 0.04) * (small ? 0.8 : 1);
-        ctx.lineWidth = 0.65 * scale;
+        }
+
+        ctx.globalAlpha = (0.86 + Math.sin(t * 0.65 + fish.phase) * 0.04) * (small ? 0.8 : 1);
+        // Traço mais encorpado para acompanhar o tamanho maior dos símbolos
+        ctx.lineWidth = 0.95 * scale;
         palette.forEach((color, i) => {
           ctx.fillStyle = color;
           ctx.strokeStyle = color;
-          ctx.stroke(discs[i]);
-          ctx.stroke(crosses[i]);
+          ctx.stroke(strokePaths[i]);
+          ctx.fill(fillPaths[i]);
         });
+
         highlights.forEach(highlight => {
           ctx.globalAlpha = highlight.alpha * (small ? 0.8 : 0.98);
           ctx.fillStyle = highlight.color;
           ctx.strokeStyle = highlight.color;
           ctx.shadowColor = highlight.color;
-          ctx.shadowBlur = 2.4 * scale;
-          ctx.lineWidth = 0.9 * scale;
-          ctx.stroke(highlight.path);
+          ctx.shadowBlur = 2.8 * scale;
+          ctx.lineWidth = 1.2 * scale;
+          if (highlight.filled) ctx.fill(highlight.path);
+          else ctx.stroke(highlight.path);
         });
         ctx.shadowBlur = 0;
-
         ctx.restore();
       });
+
       this.renderOrbs();
       ctx.globalAlpha = 1;
     }
@@ -543,19 +772,27 @@
       const palette = ['#347bca', '#58a6e9', '#82cfee'];
       const ctx = this.ctx;
       ctx.save();
+      const maxRadius = clamp(Math.min(this.width, this.height) * 0.05, 22, 34);
+
       this.orbs.forEach(orb => {
         const progress = clamp((now - orb.born) / orb.duration);
-        // Abre e fecha no mesmo lugar: a contração acontece antes do desaparecimento.
-        const openness = (1 - Math.cos(progress * Math.PI * 2)) / 2;
-        const maxRadius = clamp(Math.min(this.width, this.height) * 0.10, 42, 62);
-        const radius = this.motion.matches ? 30 : 8 + (maxRadius - 8) * openness;
-        const fade = this.motion.matches ? 0.85 : 0.95 * clamp(progress / 0.06) * (1 - clamp((progress - 0.87) / 0.13));
+        const openness = this.motion.matches ? 1 : Math.sin(progress * Math.PI);
+        const fade = this.motion.matches
+          ? 0.85
+          : 0.95 * clamp(progress / 0.05) * (1 - clamp((progress - 0.88) / 0.12));
         const centerX = orb.x * this.width;
         const centerY = orb.y * this.height;
         const paths = palette.map(() => new Path2D());
+
         this.orbPoints.forEach(point => {
-          this.drawPoint(paths[point.color], point, centerX + point.x * radius, centerY + point.y * radius, 1.1);
+          const localShow = clamp((openness - point.threshold) / 0.08);
+          if (localShow <= 0) return;
+          const x = centerX + point.x * maxRadius;
+          const y = centerY + point.y * maxRadius;
+          const pointRadius = 1.15 * (0.4 + 0.6 * localShow);
+          this.drawSymbol(paths[point.color], point.cross ? 2 : 0, x, y, pointRadius);
         });
+
         ctx.globalAlpha = fade;
         ctx.lineWidth = 0.85;
         ctx.shadowBlur = 2;
@@ -568,11 +805,17 @@
       ctx.restore();
     }
 
-    drawPoint(path, point, x, y, radius) {
-      if (point.cross) {
-        const arm = radius * 1.25;
+    // Desenha os 4 estados possíveis:
+    // 0 = bolinha vazada, 1 = bolinha preenchida, 2 = sinal '+', 3 = sinal 'x'
+    drawSymbol(path, shapeType, x, y, radius) {
+      if (shapeType === 2) {
+        const arm = radius * 1.28;
         path.moveTo(x - arm, y); path.lineTo(x + arm, y);
         path.moveTo(x, y - arm); path.lineTo(x, y + arm);
+      } else if (shapeType === 3) {
+        const arm = radius * 0.98;
+        path.moveTo(x - arm, y - arm); path.lineTo(x + arm, y + arm);
+        path.moveTo(x - arm, y + arm); path.lineTo(x + arm, y - arm);
       } else {
         path.moveTo(x + radius, y);
         path.arc(x, y, radius, 0, Math.PI * 2);
@@ -601,7 +844,6 @@
       this.letters = [];
       this.update = this.update.bind(this);
       this.schedule = this.schedule.bind(this);
-      // As medidas vêm do texto renderizado, preservando espaços e proporções.
       const name = this.original.textContent;
       const ns = 'http://www.w3.org/2000/svg';
       [...name].forEach((character, index) => {
