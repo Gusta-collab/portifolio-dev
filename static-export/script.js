@@ -769,7 +769,11 @@
       const now = performance.now();
       this.orbs = this.orbs.filter(orb => now < orb.born + orb.duration);
       if (!this.orbs.length) return;
-      const palette = ['#347bca', '#58a6e9', '#82cfee'];
+      const palette = [
+        this.palettes.reefBlue[4],
+        this.palettes.reefTeal[4],
+        this.palettes.hammerhead[4],
+      ];
       const ctx = this.ctx;
       ctx.save();
       const maxRadius = clamp(Math.min(this.width, this.height) * 0.05, 22, 34);
