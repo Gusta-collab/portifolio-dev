@@ -1,0 +1,7 @@
+The keyboard sound sample and related key-clip timing data are adapted from
+Keythm (https://github.com/AayushBharti/keythm).
+The Keythm project is distributed under the Apache License, Version 2.0.
+See KEYTHM-LICENSE.txt for the license text.
+
+The local Portuguese typing interface, colors, and presentation have been
+modified for this portfolio.

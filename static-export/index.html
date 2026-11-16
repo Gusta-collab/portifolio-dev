@@ -15,6 +15,19 @@
 </head>
 <body>
   <a class="floating-contact btn-primary" href="#contact">Fale comigo <span aria-hidden="true">↗</span></a>
+  <button
+    class="typing-game-toggle"
+    id="typing-game-toggle"
+    type="button"
+    aria-controls="typing-game-overlay"
+    aria-expanded="false"
+    aria-label="Abrir jogo de digitação"
+    title="Jogo de digitação">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M7 9h.01M10 9h.01M13 9h.01M16 9h.01M7 12h.01M10 12h.01M13 12h.01M16 12h.01M8 15h8" />
+    </svg>
+  </button>
 
   <main>
 <section class="hero" id="hero">
@@ -229,6 +242,70 @@
     </section>
   </main>
 
+  <section class="typing-game-overlay" id="typing-game-overlay" role="dialog" aria-modal="true" aria-labelledby="typing-game-title" hidden>
+    <canvas class="shark-school typing-game-sharks" id="typing-game-sharks" aria-hidden="true"></canvas>
+    <div class="typing-game-screen">
+      <div class="typing-game-header">
+        <div>
+          <p class="eyebrow typing-game-eyebrow">DESAFIO DE DIGITAÇÃO</p>
+          <h2 class="section-title typing-game-title" id="typing-game-title">Teste de <span class="text-gradient">digitação</span></h2>
+        </div>
+        <button class="typing-game-sound" id="typing-game-sound" type="button" aria-pressed="true" aria-label="Desativar sons do teclado">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 10v4h4l5 4V6l-5 4H4Z" />
+            <path d="M16 9a5 5 0 0 1 0 6M18.5 6.5a9 9 0 0 1 0 11" />
+          </svg>
+          <span id="typing-game-sound-label">Som ligado</span>
+        </button>
+      </div>
+      <p class="typing-game-instructions">Digite o texto abaixo. O cronômetro começa na primeira tecla.</p>
+
+      <div class="typing-game-stats" aria-label="Estatísticas da partida">
+        <div class="typing-game-stat">
+          <span>Tempo</span>
+          <div><strong id="typing-time">30</strong><small>s</small></div>
+        </div>
+        <div class="typing-game-stat">
+          <span>Palavras por minuto</span>
+          <div><strong id="typing-wpm">0</strong><small>PPM</small></div>
+        </div>
+        <div class="typing-game-stat">
+          <span>Precisão</span>
+          <div><strong id="typing-accuracy">100</strong><small>%</small></div>
+        </div>
+      </div>
+
+      <div class="typing-game-text-area" id="typing-game-text-area">
+        <div class="typing-game-prompt" id="typing-prompt" aria-hidden="true"></div>
+        <input class="typing-game-input" id="typing-input" type="text" aria-label="Digite o texto exibido" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <p class="typing-game-status" id="typing-game-status" aria-live="polite">Clique na área de texto e comece a digitar.</p>
+      <button class="typing-game-restart" id="typing-game-restart" type="button" hidden>Tentar de novo</button>
+
+      <div class="typing-game-keyboard" aria-hidden="true">
+        <div class="typing-game-keyboard-row">
+          <kbd data-key="Escape">esc</kbd><kbd data-key="F1">F1</kbd><kbd data-key="F2">F2</kbd><kbd data-key="F3">F3</kbd><kbd data-key="F4">F4</kbd><kbd data-key="F5">F5</kbd><kbd data-key="F6">F6</kbd><kbd data-key="F7">F7</kbd><kbd data-key="F8">F8</kbd><kbd data-key="F9">F9</kbd><kbd data-key="F10">F10</kbd><kbd data-key="F11">F11</kbd><kbd data-key="F12">F12</kbd><kbd data-key="Delete">del</kbd>
+        </div>
+        <div class="typing-game-keyboard-row">
+          <kbd data-key="Backquote">~</kbd><kbd data-key="Digit1">1</kbd><kbd data-key="Digit2">2</kbd><kbd data-key="Digit3">3</kbd><kbd data-key="Digit4">4</kbd><kbd data-key="Digit5">5</kbd><kbd data-key="Digit6">6</kbd><kbd data-key="Digit7">7</kbd><kbd data-key="Digit8">8</kbd><kbd data-key="Digit9">9</kbd><kbd data-key="Digit0">0</kbd><kbd data-key="Minus">-</kbd><kbd data-key="Equal">=</kbd><kbd class="typing-key-wide" data-key="Backspace">⌫</kbd>
+        </div>
+        <div class="typing-game-keyboard-row">
+          <kbd class="typing-key-wide" data-key="Tab">tab</kbd><kbd data-key="KeyQ">Q</kbd><kbd data-key="KeyW">W</kbd><kbd data-key="KeyE">E</kbd><kbd data-key="KeyR">R</kbd><kbd data-key="KeyT">T</kbd><kbd data-key="KeyY">Y</kbd><kbd data-key="KeyU">U</kbd><kbd data-key="KeyI">I</kbd><kbd data-key="KeyO">O</kbd><kbd data-key="KeyP">P</kbd><kbd data-key="BracketLeft">[</kbd><kbd data-key="BracketRight">]</kbd><kbd data-key="Backslash">\</kbd>
+        </div>
+        <div class="typing-game-keyboard-row">
+          <kbd class="typing-key-wide" data-key="CapsLock">caps</kbd><kbd data-key="KeyA">A</kbd><kbd data-key="KeyS">S</kbd><kbd data-key="KeyD">D</kbd><kbd data-key="KeyF">F</kbd><kbd data-key="KeyG">G</kbd><kbd data-key="KeyH">H</kbd><kbd data-key="KeyJ">J</kbd><kbd data-key="KeyK">K</kbd><kbd data-key="KeyL">L</kbd><kbd data-key="Semicolon">;</kbd><kbd data-key="Quote">'</kbd><kbd class="typing-key-wide" data-key="Enter">enter</kbd>
+        </div>
+        <div class="typing-game-keyboard-row">
+          <kbd class="typing-key-wide" data-key="ShiftLeft">shift</kbd><kbd data-key="KeyZ">Z</kbd><kbd data-key="KeyX">X</kbd><kbd data-key="KeyC">C</kbd><kbd data-key="KeyV">V</kbd><kbd data-key="KeyB">B</kbd><kbd data-key="KeyN">N</kbd><kbd data-key="KeyM">M</kbd><kbd data-key="Comma">,</kbd><kbd data-key="Period">.</kbd><kbd data-key="Slash">/</kbd><kbd class="typing-key-wide" data-key="ShiftRight">shift</kbd>
+        </div>
+        <div class="typing-game-keyboard-row typing-game-keyboard-bottom">
+          <kbd data-key="ControlLeft">ctrl</kbd><kbd data-key="AltLeft">alt</kbd><kbd data-key="MetaLeft">cmd</kbd><kbd class="typing-key-space" data-key="Space"></kbd><kbd data-key="MetaRight">cmd</kbd><kbd data-key="AltRight">alt</kbd><kbd data-key="ControlRight">ctrl</kbd>
+        </div>
+      </div>
+
+      <p class="typing-game-credit"><a href="https://github.com/AayushBharti/keythm" target="_blank" rel="noopener noreferrer">Sons e teclado inspirados no Keythm</a></p>
+    </div>
+  </section>
 
   <footer class="site-footer">
     <div class="container footer-grid">
@@ -262,5 +339,6 @@
 
   <script src="script.js"></script>
   <script src="main.js"></script>
+  <script src="typing-game.js"></script>
 </body>
 </html>
