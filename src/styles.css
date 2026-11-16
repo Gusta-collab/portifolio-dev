@@ -183,3 +183,49 @@
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
   }
 }
+
+/* Escola de tubarões decorativa na seção de contato. */
+.contact-shark-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.shark-school {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+.shark {
+  position: absolute;
+  width: clamp(9rem, 18vw, 15rem);
+  height: auto;
+  color: var(--color-primary);
+  fill: currentColor;
+  filter: drop-shadow(0 0 0.5rem color-mix(in srgb, var(--color-primary) 45%, transparent));
+  animation: shark-swim 16s linear infinite;
+}
+
+.shark circle { fill: var(--color-accent); }
+.shark-one { top: 18%; left: -18rem; animation-delay: -2s; }
+.shark-two { top: 56%; left: -24rem; width: clamp(7rem, 14vw, 12rem); opacity: 0.65; animation-duration: 21s; animation-delay: -9s; }
+.shark-three { top: 35%; left: -28rem; width: clamp(5rem, 10vw, 9rem); opacity: 0.45; animation-duration: 25s; animation-delay: -15s; }
+
+@keyframes shark-swim {
+  0% { transform: translate3d(-15vw, 0, 0) rotate(2deg); }
+  45% { transform: translate3d(55vw, -1rem, 0) rotate(-2deg); }
+  100% { transform: translate3d(125vw, 1rem, 0) rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shark { animation: none; left: auto; right: 8%; }
+}
+
+@media (max-width: 767px) {
+  .shark-school { opacity: 0.12; }
+  .shark-one { top: 10%; }
+  .shark-two { top: 72%; }
+}

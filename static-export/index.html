@@ -11,16 +11,17 @@
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="/static-export/icons/hexagono2.png" type="image/x-icon" />
+  <link rel="icon" href="icons/hexagono2.png" type="image/png" />
 </head>
 <body>
   <header class="header" id="header">
     <div class="container header-content">
-      <a href="#" class="logo">Gustavo Alexandre</a>
-      <nav class="nav-desktop">
+      <a href="#" class="logo" aria-label="Voltar ao início">GA</a>
+      <nav class="nav-desktop nav-pill" aria-label="Navegação principal">
+        <a class="active" href="#hero">Início</a>
         <a href="#about">Sobre</a>
         <a href="#projects">Projetos</a>
-        <a href="#contact" >Contato</a>
+        <a class="header-cta" href="#contact">Fale comigo <span aria-hidden="true">↗</span></a>
       </nav>
       <button class="menu-toggle" aria-label="Abrir menu" id="menu-toggle">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -30,34 +31,36 @@
       <button class="menu-close" aria-label="Fechar menu" id="menu-close">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
+      <a href="#hero">Início</a>
       <a href="#about">Sobre</a>
       <a href="#projects">Projetos</a>
-      <a href="#contact">Contato</a>
+      <a href="#contact">Fale comigo ↗</a>
     </div>
   </header>
 
   <main>
 <section class="hero" id="hero">
+  <div class="hero-gridline" aria-hidden="true"></div>
   <div class="container hero-grid">
-    
-    <!-- COLUNA 1 -->
-    <div class="hero-text fade-in" style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
-      <img src="images/eu.jpg" alt="Foto de Gustavo" class="foto-bolinha" />
-
-      <h1 class="hero-title hover-letter-weight" style="text-align: center;">Desenvolvedor<br>Desktop</h1>
-      
-      <div class="hero-buttons" style="display: flex; justify-content: flex-start; gap: 15px; margin-top: 15px;">
-        <a href="#projects" class="btn-primary">Ver projetos</a>
+    <div class="hero-text">
+      <p class="hero-kicker">GUSTAVO ALEXANDRE <span>•</span> DESENVOLVIMENTO E AUTOMAÇÃO</p>
+      <h1 class="hero-title">Soluções digitais<br>que <em>movem</em> processos.</h1>
+      <p class="hero-description">Crio aplicações desktop, automações e integrações que transformam rotinas manuais em fluxos mais rápidos, seguros e organizados.</p>
+      <div class="hero-buttons">
+        <a href="#projects" class="btn-primary">Ver projetos <span aria-hidden="true">↗</span></a>
         <a href="#contact" class="btn-secondary">Vamos conversar</a>
       </div>
-    </div>
-    <!-- Coluna 1 -->
-
-    <div class="hero-image fade-in stagger-2" style="position: relative; display: flex; justify-content: center; align-items: center; min-height: 500px; width: 100%;">
-      <div id="blackhole-container" style="position: absolute; width: 1100px; height: 1100px; max-width: none; pointer-events: none;">
+      <div class="hero-tags" aria-label="Tecnologias principais">
+        <span>C#</span><span>Python</span><span>Automação</span><span>Excel / PDF</span>
       </div>
     </div>
-    <!-- Coluna 2 -->
+
+    <div class="hero-image fade-in stagger-2">
+      <div class="hero-photo-card">
+        <img src="images/eu.jpg" alt="Foto de Gustavo" class="hero-photo" />
+        <div class="hero-photo-caption"><span>DESENVOLVEDOR</span><strong>Desktop &amp; automação</strong></div>
+      </div>
+    </div>
   </div>
   
   <div class="scroll-indicator">
@@ -75,6 +78,15 @@
     </div>
   </div>
 </section>
+
+    <section class="quick-links" aria-label="Resumo profissional">
+      <div class="container quick-links-grid">
+        <a href="#about"><span class="quick-label"><i class="dot dot-green"></i> FOCO</span><strong>Eficiência operacional</strong><small>Menos tarefas repetitivas</small></a>
+        <a href="#projects"><span class="quick-label"><i class="dot dot-orange"></i> ENTREGAS</span><strong>Sistemas sob medida</strong><small>Do processo ao resultado</small></a>
+        <a href="#about"><span class="quick-label"><i class="dot dot-blue"></i> FERRAMENTAS</span><strong>C# + Python</strong><small>Integrações que funcionam</small></a>
+        <a href="#contact"><span class="quick-label"><i class="dot dot-pink"></i> CONTATO</span><strong>Vamos conversar <span aria-hidden="true">→</span></strong><small>Seu próximo projeto começa aqui</small></a>
+      </div>
+    </section>
 
     <section class="about" id="about">
       <div class="container">
@@ -126,8 +138,12 @@
     </section>
 
     <section class="projects" id="projects">
-      <div class="container">
-          <h3 class="eyebrow">Projetos</h3>
+      <div class="container projects-intro">
+          <div>
+            <p class="eyebrow">O que eu construo</p>
+            <h2 class="section-title">Projetos pensados para funcionar no mundo real.</h2>
+          </div>
+          <p class="projects-note">Aplicações, automações e integrações desenvolvidas para reduzir atrito e dar clareza às operações.</p>
       </div>
       <div class="projects-grid">
           
@@ -219,6 +235,7 @@
     </section>
 
     <section class="contact" id="contact">
+      <canvas class="shark-school" id="shark-school" aria-hidden="true"></canvas>
       <div class="container">
         
         <div class="contact-header fade-in">
@@ -260,14 +277,37 @@
   </main>
 
 
-  <footer style="text-align: center; padding: 2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 2rem;">
-    <div class="container">
-      <p style="color: #a1a1aa; font-size: 0.9rem;">
-        &copy; <span id="year"></span> Gustavo Alexandre. Todos os direitos reservados.
-      </p>
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div><span class="footer-label">TRABALHO</span><a href="#projects">Projetos</a><a href="#about">Sobre</a></div>
+      <div><span class="footer-label">SITE</span><a href="#contact">Contato</a><a href="#hero">Início</a></div>
+      <div><span class="footer-label">SOCIAL</span><a href="https://github.com/Gusta-collab" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/gustavoferreirati/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>
+      <div class="footer-contact"><span class="footer-label">LOCALIZAÇÃO</span><strong>São Paulo, Brasil</strong><span class="footer-label">EMAIL</span><a href="mailto:gustavo@gustavoalexandre.dev">gustavo@gustavoalexandre.dev</a></div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; <span id="year"></span> Gustavo Alexandre. Todos os direitos reservados.</p>
+      <p>Feito com código, café e curiosidade.</p>
+    </div>
+    <div class="footer-signature container" id="footer-signature">
+      <svg class="footer-name" viewBox="0 0 1200 250" role="img" aria-label="Gustavo Alexandre">
+        <defs>
+          <pattern id="name-dots" width="5" height="5" patternUnits="userSpaceOnUse">
+            <circle cx="2.5" cy="2.5" r="1.05" fill="#66baff" />
+          </pattern>
+          <linearGradient id="name-fade" x1="0" y1="0" x2="0.9" y2="1">
+            <stop offset="0%" stop-color="white" />
+            <stop offset="100%" stop-color="#5c5c5c" />
+          </linearGradient>
+          <mask id="name-mask"><rect width="1200" height="250" fill="url(#name-fade)" /></mask>
+        </defs>
+        <g class="footer-letters" fill="url(#name-dots)" mask="url(#name-mask)">
+          <text x="8" y="193" textLength="1184" lengthAdjust="spacingAndGlyphs">Gustavo Alexandre</text>
+        </g>
+      </svg>
     </div>
   </footer>
 
   <script src="script.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

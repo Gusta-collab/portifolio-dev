@@ -30,9 +30,17 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" ref={ref} className="bg-background py-24 md:py-32">
+    <section id="contact" ref={ref} className="contact-shark-section bg-background py-24 md:py-32">
+      <div className="shark-school" aria-hidden="true">
+        {["shark-one", "shark-two", "shark-three"].map((className) => (
+          <svg key={className} className={`shark ${className}`} viewBox="0 0 180 80" role="presentation">
+            <path d="M4 49c25-25 57-34 91-24l22-19-3 24c22 6 39 15 62 31-23 3-42 2-60-3l-20 18 4-23C67 61 35 58 4 49Z" />
+            <circle cx="133" cy="39" r="2.5" />
+          </svg>
+        ))}
+      </div>
       <div className="mx-auto max-w-6xl px-6">
-        <div className="grid gap-12 md:grid-cols-2 md:gap-16">
+        <div className="relative z-[2] grid gap-12 md:grid-cols-2 md:gap-16">
           <div className="space-y-8 fade-in">
             <div>
               <p className="font-mono text-sm font-medium uppercase tracking-widest text-primary">Contato</p>
