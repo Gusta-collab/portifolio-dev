@@ -4,6 +4,13 @@
   const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
   const randomBetween = (min, max) => min + Math.random() * (max - min);
   const angleDifference = (angle, reference) => Math.atan2(Math.sin(angle - reference), Math.cos(angle - reference));
+  const grayscale = color => {
+    const red = parseInt(color.slice(1, 3), 16);
+    const green = parseInt(color.slice(3, 5), 16);
+    const blue = parseInt(color.slice(5, 7), 16);
+    const value = Math.round(red * 0.2126 + green * 0.7152 + blue * 0.0722);
+    return `#${value.toString(16).padStart(2, '0').repeat(3)}`;
+  };
 
   /* ------------------------------------------------------------------ *
    * Anatomia dos tubarões (vista superior)
@@ -162,14 +169,19 @@
       // Tons discretos próximos à referência: azul profundo e amarelo-oliva.
       // 0–5: corpo; 6: tom intermediário; 7–10: detalhes coloridos esparsos.
       this.palettes = {
-        reefBlue: ['#27456f', '#2c5080', '#315b90', '#37669d', '#3b6fa8', '#477bad', '#6883a6', '#7f8035', '#527c3a', '#785597', '#b0833b'],
-        reefTeal: ['#294967', '#2c5377', '#315e87', '#376994', '#3b739f', '#477eaa', '#6989a3', '#78823b', '#527e47', '#70588f', '#a78b43'],
+        reefBlue: ['#27456f', '#2c5080', '#315b90', '#37669d', '#3b6fa8', '#477bad', '#131b25', '#7f8035', '#527c3a', '#785597', '#b0833b', '#e0c75f', '#ff8800'],
+        reefTeal: ['#294967', '#2c5377', '#315e87', '#376994', '#3b739f', '#477eaa', '#6989a3', '#78823b', '#527e47', '#70588f', '#a78b43','#e0c75f', '#ff8800'],
         hammerhead: ['#4c532b', '#59622f', '#667036', '#747c3c', '#858a46', '#949855', '#a4a464', '#3c5e83', '#5e8141', '#6e5a85', '#ad9751'],
       };
       this.twinklePalettes = {
-        reefBlue: ['#4b86bd', '#649047', '#9b914a', '#8e67af'],
-        reefTeal: ['#4c83ad', '#68904e', '#96954f', '#8267a3'],
-        hammerhead: ['#a6a755', '#8e9d4f', '#5f7b99', '#a88761'],
+        reefBlue: ['#4b86bd', '#649047', '#9b914a', '#8e67af', '#001aff','#747ed8','#ffffff','#c4c4c4'],
+        reefTeal: ['#4c83ad', '#68904e', '#96954f', '#8267a3','#001aff','#747ed8'],
+        hammerhead: ['#a6a755', '#8e9d4f', '#5f7b99', '#a88761','#e4e00f','#f56a19','#ff6e6e'],
+      };
+      this.renderPalettes = {
+        reefBlue: this.palettes.reefBlue.map(grayscale),
+        reefTeal: this.palettes.reefTeal.map(grayscale),
+        hammerhead: this.palettes.hammerhead,
       };
       this.fish.forEach(fish => {
         const columns = this.shapes[fish.type].columns;
@@ -658,7 +670,7 @@
 
       this.fish.forEach(fish => {
         const anatomy = this.shapes[fish.type];
-        const palette = this.palettes[fish.palette];
+        const palette = this.renderPalettes[fish.palette];
         const twinklePalette = this.twinklePalettes[fish.palette];
         const scale = baseScale * fish.size;
         const { bank, spread } = this.updateBody(fish, anatomy.columns, t, w, h, scale);
