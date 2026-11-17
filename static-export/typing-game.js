@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('typing-game-toggle');
+  const homeButton = document.getElementById('typing-game-home');
   const overlay = document.getElementById('typing-game-overlay');
   const input = document.getElementById('typing-input');
   const textArea = document.getElementById('typing-game-text-area');
@@ -422,6 +423,8 @@ document.addEventListener('DOMContentLoaded', () => {
     else closeGame();
   });
 
+  homeButton?.addEventListener('click', closeGame);
+
   soundToggle.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
     updateSoundButton();
@@ -452,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (event.code === 'Tab') {
       const creditLink = overlay.querySelector('.typing-game-credit a');
-      const focusable = [input, soundToggle, ...(restart.hidden ? [] : [restart]), creditLink, toggle];
+      const focusable = [homeButton, input, soundToggle, ...(restart.hidden ? [] : [restart]), creditLink, toggle].filter(Boolean);
       const currentIndex = focusable.indexOf(document.activeElement);
       const nextIndex = event.shiftKey
         ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
