@@ -588,9 +588,9 @@ a.info-item:hover { color: var(--accent); }
 .contact .btn-primary { background: var(--accent); }
 
 /* Os dois controles ficam fixos; o teclado permanece sobre o jogo. */
-.typing-game-toggle { right: 22px; bottom: 81px; z-index: 310; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-raised); color: var(--fg); box-shadow: 0 5px 20px rgb(0 0 0 / 12%); }
+.typing-game-toggle { right: 22px; bottom: 81px; z-index: 310; width: 44px; height: 44px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: var(--on-accent); box-shadow: 0 5px 20px rgb(0 0 0 / 12%); }
 .typing-game-toggle svg { width: 20px; height: 20px; }
-.typing-game-toggle:hover { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); transform: none; }
+.typing-game-toggle:hover { border-color: var(--accent-hover); background: var(--accent-hover); color: var(--on-accent); transform: none; }
 .typing-game-toggle:focus-visible { outline-color: var(--accent); }
 .floating-contact { position: fixed; right: 22px; bottom: 22px; z-index: 210; min-height: 44px; box-shadow: 0 5px 20px rgb(0 0 0 / 12%); }
 .typing-game-open .floating-contact { visibility: hidden; pointer-events: none; }
