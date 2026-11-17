@@ -1,4 +1,4 @@
-/* Inicialização da página. As classes de animação são definidas em script.js. */
+/* Inicialização da página. As classes de animação são definidas em shark-effects.js. */
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.documentElement;
   const themeToggle = document.getElementById('theme-toggle');

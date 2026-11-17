@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!audioContext) audioContext = new window.AudioContext();
 
       if (!audioLoad) {
-        audioLoad = fetch('sounds/keythm-sound.ogg')
+        audioLoad = fetch('assets/audio/keythm-sound.ogg')
           .then(response => {
             if (!response.ok) throw new Error(`Falha ao carregar o áudio (${response.status}).`);
             return response.arrayBuffer();

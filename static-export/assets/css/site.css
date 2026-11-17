@@ -1,3 +1,405 @@
+/* Base compartilhada do site. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { line-height: 1.6; -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+.shark-school { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* ---- Jogo de digitação (mesma estrutura de antes, recolorida) ---- */
+.typing-game-open {
+  overflow: hidden;
+}
+
+.typing-game-toggle {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 210;
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background: #282a2b;
+  color: #dedede;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.typing-game-toggle svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.typing-game-toggle:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.36);
+  background: #343738;
+}
+
+.typing-game-toggle:focus-visible {
+  outline: 2px solid #ff7a2f;
+  outline-offset: 3px;
+}
+
+.typing-game-overlay {
+  --game-origin-x: 50%;
+  --game-origin-y: 50%;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 2rem 1.5rem;
+  background: #1e2021;
+  clip-path: circle(0 at var(--game-origin-x) var(--game-origin-y));
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    clip-path 0.55s cubic-bezier(0.22, 0.8, 0.25, 1),
+    opacity 0.25s ease,
+    visibility 0s linear 0.55s;
+}
+
+.typing-game-overlay.is-visible {
+  clip-path: circle(200vmax at var(--game-origin-x) var(--game-origin-y));
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.typing-game-overlay[hidden] {
+  display: none;
+}
+
+.typing-game-screen {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 64rem);
+  margin: auto;
+  text-align: center;
+}
+
+.typing-game-sharks {
+  opacity: 0.8;
+}
+
+.typing-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.typing-game-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.typing-game-sound {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c5c5c5;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.typing-game-sound:hover,
+.typing-game-sound[aria-pressed="true"] {
+  border-color: rgba(255, 122, 47, 0.38);
+  background: rgba(255, 122, 47, 0.1);
+  color: #ffe3d0;
+}
+
+.typing-game-sound svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.typing-game-instructions {
+  margin: 0.8rem auto 0;
+  color: #a6a6a6;
+  font-size: 0.9rem;
+}
+
+.typing-game-stats {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  margin: 2rem auto 0.75rem;
+}
+
+.typing-game-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.typing-game-stat > span {
+  color: rgba(220, 220, 220, 0.5);
+  font-size: 0.7rem;
+}
+
+.typing-game-stat div {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.typing-game-stat strong {
+  color: #f0f0f0;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.typing-game-stat small {
+  color: rgba(220, 220, 220, 0.5);
+  font-size: 0.68rem;
+}
+
+.typing-game-text-area {
+  position: relative;
+  width: 100%;
+  min-height: 10rem;
+  overflow: hidden;
+  padding: 1.2rem 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.9rem;
+  background: rgba(15, 16, 16, 0.74);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  text-align: left;
+  cursor: text;
+}
+
+.typing-game-prompt {
+  min-height: 7.8rem;
+  color: rgba(226, 226, 226, 0.5);
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 2.2vw, 1.5rem);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.typing-game-word {
+  display: inline-flex;
+  margin-right: 0.48em;
+}
+
+.typing-game-prompt .is-correct {
+  color: #ededed;
+}
+
+.typing-game-prompt .is-incorrect {
+  color: #e8836b;
+}
+
+.typing-game-prompt .is-current {
+  border-bottom: 2px solid #ff7a2f;
+  animation: typing-caret 1s steps(2, start) infinite;
+}
+
+@keyframes typing-caret {
+  to { border-color: transparent; }
+}
+
+.typing-game-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 1.2rem 1.35rem;
+  border: 0;
+  opacity: 0;
+  cursor: text;
+}
+
+.typing-game-status {
+  min-height: 1.5rem;
+  margin: 0.35rem 0 0;
+  color: rgba(220, 220, 220, 0.45);
+  font-size: 0.8rem;
+}
+
+.typing-game-restart {
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c5c5c5;
+  cursor: pointer;
+}
+
+.typing-game-restart:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.typing-game-keyboard {
+  display: grid;
+  gap: 0.35rem;
+  width: min(100%, 58rem);
+  margin: 1.25rem auto 0;
+  padding: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.18);
+}
+
+.typing-game-keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.typing-game-keyboard kbd {
+  display: grid;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.55);
+  border-radius: 0.32rem;
+  background: linear-gradient(180deg, #37393a, #292b2c);
+  color: #aaa;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  transition: transform 0.08s ease, border-color 0.08s ease, background-color 0.08s ease, box-shadow 0.08s ease;
+}
+
+.typing-game-keyboard kbd.typing-key-wide {
+  flex-grow: 1.6;
+  font-size: 0.56rem;
+}
+
+.typing-game-keyboard kbd.is-pressed {
+  transform: translateY(2px);
+  border-color: rgba(255, 122, 47, 0.7);
+  border-bottom-width: 1px;
+  background: linear-gradient(180deg, rgba(255, 122, 47, 0.6), rgba(200, 90, 25, 0.6));
+  color: #fff;
+  box-shadow: 0 0 0.8rem rgba(255, 122, 47, 0.24);
+}
+
+.typing-game-keyboard-bottom kbd {
+  flex-grow: 1.15;
+}
+
+.typing-game-keyboard-bottom kbd.typing-key-space {
+  flex-grow: 6;
+}
+
+.typing-game-credit {
+  margin-top: 1rem;
+  color: rgba(220, 220, 220, 0.35);
+  font-size: 0.7rem;
+}
+
+.typing-game-credit a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+.typing-game-credit a:hover {
+  color: #ededed;
+}
+
+@media (max-width: 767px) {
+  .typing-game-toggle {
+    right: 1rem;
+    bottom: 1rem;
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .typing-game-overlay {
+    padding: 1.25rem 1rem;
+  }
+
+  .typing-game-header {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .typing-game-stats {
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.5rem auto 0.75rem;
+  }
+
+  .typing-game-stat > span {
+    font-size: 0.58rem;
+  }
+
+  .typing-game-stat strong {
+    font-size: 0.95rem;
+  }
+
+  .typing-game-prompt {
+    min-height: 8.1rem;
+    font-size: 1rem;
+  }
+
+  .typing-game-keyboard {
+    gap: 0.22rem;
+    margin-top: 0.75rem;
+    padding: 0.4rem;
+  }
+
+  .typing-game-keyboard-row {
+    gap: 0.16rem;
+  }
+
+  .typing-game-keyboard kbd {
+    height: 1.45rem;
+    border-radius: 0.2rem;
+    font-size: 0.46rem;
+  }
+
+  .typing-game-keyboard kbd.typing-key-wide {
+    font-size: 0.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-game-toggle,
+  .typing-game-overlay,
+  .typing-game-prompt .is-current,
+  .typing-game-keyboard kbd {
+    transition: none;
+    animation: none;
+  }
+
+  .typing-game-overlay {
+    transition-duration: 0.01ms;
+  }
+}
+
+.typing-game-overlay { color: var(--sea-ink); }
+.typing-game-title { color: var(--sea-ink); }
+.typing-game-overlay :focus-visible { outline-color: var(--olive-light); }
+.typing-game-toggle:focus-visible { outline-color: var(--olive); }
+
 /* Perfil compacto. Os dois temas compartilham a mesma estrutura. */
 :root {
   color-scheme: dark;
@@ -50,6 +452,10 @@
   --tech-icon-filter: grayscale(1) brightness(0) invert(.3);
   --danger: #b6314c;
   --header-bg: rgb(255 255 255 / 94%);
+}
+
+:root[data-theme="light"] .shark-school {
+  filter: grayscale(1);
 }
 
 /* Tipografia em 125% com o zoom do navegador em 100%. */
@@ -131,11 +537,6 @@ a.info-item:hover { color: var(--accent); }
 .about-copy strong { color: var(--fg); font-weight: 500; }
 .about-list { display: grid; gap: 8px; margin-top: 16px; padding-left: 17px; }
 .about-list li::marker { color: var(--accent); font-size: .8em; }
-.experience-row { display: flex; align-items: center; gap: 14px; padding-block: 19px; border-top: 1px solid var(--line); }
-.experience-mark { display: grid; flex: 0 0 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 6px; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; }
-.experience-row h3 { font-size: 0.8125rem; font-weight: 600; }
-.experience-row p { margin-top: 2px; color: var(--muted); font-family: var(--mono); font-size: 0.625rem; }
-.experience-tag { margin-left: auto; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-family: var(--mono); font-size: 0.5625rem; }
 .stack-row { display: grid; grid-template-columns: 145px 1fr; align-items: start; gap: 18px; padding-block: 17px; }
 .stack-row + .stack-row { border-top: 1px solid var(--line); }
 .stack-row h3 { padding-top: 5px; color: var(--muted); font-family: var(--mono); font-size: 0.6875rem; font-weight: 400; }
@@ -283,7 +684,6 @@ a.info-item:hover { color: var(--accent); }
   .section-header { padding: 16px 18px; }
   .section-header h2 { font-size: 1.3125rem; }
   .about-copy { font-size: 0.75rem; }
-  .experience-tag { max-width: 60px; font-size: 0.5rem; text-align: center; }
   .stack-row { grid-template-columns: 1fr; gap: 10px; padding-block: 15px; }
   .stack-row h3 { padding-top: 0; }
   .project-grid { grid-template-columns: 1fr; padding-top: 0; }

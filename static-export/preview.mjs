@@ -3,7 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
 
-const root = fileURLToPath(new URL('./static-export/', import.meta.url));
+const root = fileURLToPath(new URL('./', import.meta.url));
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
