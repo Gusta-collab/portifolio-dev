@@ -698,7 +698,6 @@ a.info-item:hover { color: var(--accent); }
   .footer-row { gap: 10px; padding-inline: 16px; font-size: 0.5625rem; }
   .footer-name-label { font-size: 0.6875rem; }
   .footer-nav { gap: 12px; }
-  .footer-country { display: none; }
 }
 @media (max-width: 360px) {
   .footer-row { flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; }
@@ -707,4 +706,36 @@ a.info-item:hover { color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .project-details, .project-toggle .icon, .project-card { transition: none; }
+}
+
+/* Entrada: as bordas ganham um traço breve. */
+.trace-target { position: relative; }
+.trace-lines { position: absolute; inset: 0; z-index: 3; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.trace-edge { position: absolute; display: block; background: var(--accent); opacity: 0; }
+.trace-top, .trace-bottom { right: 0; left: 0; height: 1px; transform: scaleX(0); }
+.trace-left, .trace-right { top: 0; bottom: 0; width: 1px; transform: scaleY(0); }
+.trace-top { top: 0; transform-origin: left center; }
+.trace-right { right: 0; transform-origin: center top; }
+.trace-bottom { bottom: 0; transform-origin: right center; }
+.trace-left { left: 0; transform-origin: center bottom; }
+.is-tracing .trace-top { animation: trace-across .7s ease-out both; }
+.is-tracing .trace-right { animation: trace-down .7s .25s ease-out both; }
+.is-tracing .trace-bottom { animation: trace-across .7s .5s ease-out both; }
+.is-tracing .trace-left { animation: trace-down .7s .75s ease-out both; }
+.section-divider .trace-lines { left: 50%; width: 100vw; transform: translateX(-50%); border-radius: 0; }
+.section-divider .trace-edge { background: var(--fg); }
+.section-header .trace-lines { z-index: 1; }
+.contact .trace-lines { z-index: 1; }
+@keyframes trace-across {
+  0% { transform: scaleX(0); opacity: .9; }
+  75% { transform: scaleX(1); opacity: .9; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes trace-down {
+  0% { transform: scaleY(0); opacity: .9; }
+  75% { transform: scaleY(1); opacity: .9; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trace-edge { animation: none !important; }
 }
